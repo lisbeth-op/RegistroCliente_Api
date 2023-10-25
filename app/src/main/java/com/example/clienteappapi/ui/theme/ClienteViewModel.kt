@@ -11,11 +11,15 @@ import com.example.clienteappapi.Data.Repository.ClienteRepository
 import com.example.customerapi.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,8 +42,11 @@ class ClienteApiViewModel @Inject constructor(
     var direccionError by mutableStateOf(true)
     var limiteCreditoError by mutableStateOf(true)
 
+    private val _state = MutableStateFlow(ClienteListState())
+    val state=_state.asStateFlow()
 
     private val _isMessageShown = MutableSharedFlow<Boolean>()
+    val isMessageShownFlow = _isMessageShown.asSharedFlow()
     fun setMessageShown() {
         viewModelScope.launch {
             _isMessageShown.emit(true)
@@ -51,31 +58,55 @@ class ClienteApiViewModel @Inject constructor(
         direccionError = direccion.isBlank()
         limiteCreditoError = limiteCredito.isBlank()
         return !(nombreError || rncError  || direccionError|| limiteCreditoError)
+
     }
-    private fun limpiar() {
+
+    init {
+        clienteRepository.getCliente().onEach { result ->
+            when (result) {
+                is Resource.Loading -> {
+                   _state.update {
+                       it.copy(
+                           isLoading =true
+                       )
+                   }
+                }
+
+                is Resource.Success -> {
+                    _state.update {
+                        it.copy(
+                            isLoading =false,
+                            cliente = result.data?: emptyList()
+                        )
+                    }
+                }
+
+                is Resource.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading =false,
+                            error = result.message?: "Error no reconocido"
+                        )
+                    }
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+     fun limpiar() {
         nombre=""
        rnc=""
-        direccion=""
+         direccion=""
         limiteCredito=""
     }
 
-//    init {
-//        clienteRepository.getCliente().onEach { result ->
-//            when (result) {
-//                is Resource.Loading -> {
-//                    _state.value = ClienteListState(isLoading = true)
-//                }
-//
-//                is Resource.Success -> {
-//                    _state.value = ClienteListState(cliente = result.data ?: emptyList())
-//                }
-//
-//                is Resource.Error -> {
-//                    _state.value = ClienteListState(error = result.message ?: "Error desconocido")
-//                }
-//            }
-//        }.launchIn(viewModelScope)
-//    }
+
+
+    val clientes: StateFlow<Resource<List<ClienteDto>>> = clienteRepository.getCliente().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = Resource.Loading()
+    )
     fun saveCliente() {
         if (validarCampos()) {
             viewModelScope.launch {
@@ -83,7 +114,7 @@ class ClienteApiViewModel @Inject constructor(
                     nombre = nombre,
                     rnc=rnc,
                     direcion=direccion,
-                    //limiteCredito = limiteCredito
+                    limiteCredito = 0
 
 
                 )
