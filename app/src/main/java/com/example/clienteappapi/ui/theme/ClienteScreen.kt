@@ -59,11 +59,11 @@ fun ClienteScreen(viewModel: ClienteApiViewModel = hiltViewModel()) {
                 viewModel.limpiar()
             }
         }
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(paddingValues)
                 .padding(8.dp)
         ) {
             val keyboardController = LocalSoftwareKeyboardController.current
@@ -96,9 +96,8 @@ fun ClienteScreen(viewModel: ClienteApiViewModel = hiltViewModel()) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = {
-                    val newValue = it.toIntOrNull()
-                    if (newValue != null) {
-                        viewModel.limiteCredito = newValue.toString()
+                    if (!it.isNullOrEmpty()) {
+                        viewModel.limiteCredito = it.toInt()
                     }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(

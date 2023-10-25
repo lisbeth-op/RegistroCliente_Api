@@ -1,6 +1,5 @@
 package com.example.clienteappapi.ui.theme
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,7 +34,7 @@ class ClienteApiViewModel @Inject constructor(
     var nombre by mutableStateOf("")
     var rnc by mutableStateOf("")
     var direccion by mutableStateOf("")
-    var limiteCredito by mutableStateOf("")
+    var limiteCredito by mutableStateOf(0)
 
     var nombreError by mutableStateOf(true)
     var rncError by mutableStateOf(true)
@@ -56,7 +55,7 @@ class ClienteApiViewModel @Inject constructor(
         nombreError = nombre.isBlank() || nombre.length < 3
         rncError = rnc.isBlank()
         direccionError = direccion.isBlank()
-        limiteCreditoError = limiteCredito.isBlank()
+        limiteCreditoError = limiteCredito <=0
         return !(nombreError || rncError  || direccionError|| limiteCreditoError)
 
     }
@@ -97,7 +96,7 @@ class ClienteApiViewModel @Inject constructor(
         nombre=""
        rnc=""
          direccion=""
-        limiteCredito=""
+        limiteCredito= 0
     }
 
 
@@ -111,14 +110,14 @@ class ClienteApiViewModel @Inject constructor(
         if (validarCampos()) {
             viewModelScope.launch {
                 val cliente= ClienteDto(
-                    nombre = nombre,
+                    nombres = nombre,
                     rnc=rnc,
-                    direcion=direccion,
-                    limiteCredito = 0
+                    direccion=direccion,
+                    limiteCredito = limiteCredito
 
 
                 )
-
+                clienteRepository.PstCliente(cliente)
                 limpiar()
             }
         }

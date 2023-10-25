@@ -13,7 +13,7 @@ suspend fun getClientes():List<ClienteDto>
 @GET("api/Clientes/{id}")
 suspend fun getClientesId(@Path("clienteId") clienteId: Int):ClienteDto
 @POST("/api/Clientes")
-suspend fun postClientes(@Body cliente: ClienteDto):Response<ClienteDto>
+suspend fun postClientes(@Body cliente: ClienteDto):ClienteDto
 
 @DELETE("api/Clientes/{id}")
 suspend fun deleteCliente(@Path("clienteId") clienteId: Int,@Body clienteDto: ClienteDto):Response<Unit>

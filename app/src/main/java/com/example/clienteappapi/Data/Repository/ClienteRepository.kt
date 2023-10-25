@@ -12,37 +12,35 @@ import javax.inject.Inject
 class ClienteRepository @Inject constructor(private val api: ClienteApi) {
     fun getCliente(): Flow<Resource<List<ClienteDto>>> = flow {
         try {
-            emit(Resource.Loading()) //indicar que estamos cargando
+            emit(Resource.Loading())
 
-            val cliente = api.getClientes() //descarga las monedas de internet, se supone quedemora algo
+            val cliente = api.getClientes()
 
-            emit(Resource.Success(cliente)) //indicar que se cargo correctamente.
+            emit(Resource.Success(cliente))
         } catch (e: HttpException) {
-            //error general HTTP
             emit(Resource.Error(e.message ?: "Error HTTP GENERAL"))
         } catch (e: IOException) {
-            //debe verificar tu conexion a internet
+
             emit(Resource.Error(e.message ?: "verificar tu conexion a internet"))
         }
     }
 
     fun getClienteId(id:Int): Flow<Resource <ClienteDto>> = flow {
         try {
-            emit(Resource.Loading()) //indicar que estamos cargando
+            emit(Resource.Loading())
 
-            val clienteId = api.getClientesId(id) //descarga las monedas de internet, se supone quedemora algo
-
-            emit(Resource.Success(clienteId)) //indicar que se cargo correctamente.
+            val clienteId = api.getClientesId(id)
+            emit(Resource.Success(clienteId))
         } catch (e: HttpException) {
-            //error general HTTP
+
             emit(Resource.Error(e.message ?: "Error HTTP GENERAL"))
         } catch (e: IOException) {
-            //debe verificar tu conexion a internet
+
             emit(Resource.Error(e.message ?: "verificar tu conexion a internet"))
         }
     }
 
-    suspend fun PstCliente(cliente: ClienteDto) = api.postClientes(cliente)
+    suspend fun PstCliente(cliente: ClienteDto):ClienteDto= api.postClientes(cliente)
     suspend fun deleteCliente(id:Int, cliente: ClienteDto)=api.deleteCliente(id,cliente)
 }
 

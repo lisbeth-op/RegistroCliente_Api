@@ -28,7 +28,7 @@ object AppModule {
         @Singleton
         fun provideClienteApi(moshi: Moshi): ClienteApi {
             return Retrofit.Builder()
-                .baseUrl("http://clientes-api.somee.com/")
+                .baseUrl("http://clientes-api.somee.com")
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .build()
                     .create(ClienteApi::class.java)
